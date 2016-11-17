@@ -44,25 +44,23 @@ class Squad(models.Model):
 
 
 class SquadUserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, email, password):
+    def create_user(self, email, username, password):
         if not email:
             raise ValueError("Users must have an email address")
 
         user = self.model(
             email=self.normalize_email(email),
-            first_name=first_name,
-            last_name=last_name,
+            username=username,
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, first_name, last_name):
+    def create_superuser(self, email, username, password):
         user = self.create_user(
             email=email,
+            username=username,
             password=password,
-            first_name=first_name,
-            last_name=last_name
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -79,6 +77,7 @@ class SquadUser(AbstractBaseUser):
     squad = models.ForeignKey("Squad", related_name="members", null=True)
     status = models.CharField(max_length=255, blank=True)
     friends = models.ManyToManyField("self")
+    username = models.CharField(max_length=255, blank=False)
     token = models.CharField(max_length=255, blank=True)
 
     objects = SquadUserManager()
@@ -90,6 +89,7 @@ class SquadUser(AbstractBaseUser):
         return {
             "id": self.id,
             "email": self.email,
+            "username": self.username,
             "token": self.token
         }
 
@@ -111,5 +111,3 @@ class SquadUser(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
-
-
