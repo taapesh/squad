@@ -1,0 +1,1 @@
+web: gunicorn squad.wsgi --log-file -
