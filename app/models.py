@@ -19,28 +19,86 @@ class Promotion(models.Model):
     squad_size = models.IntegerField(null=True)
 
 
-class Content(models.Model):
+class SquadInvite(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    url = models.CharField(max_length=255, blank=True)
-    pin = models.ForeignKey("Pin", related_name="content")
-    content_type = models.CharField(max_length=255, blank=False, null=False)
+    invited_by = models.CharField(max_length=255, blank=True)
+    squad = models.ForeignKey("Squad", related_name="invites")
+    user = models.ForeignKey("SquadUser", related_name="invites")
+    created = models.DateTimeField(auto_now_add=True)
+
+    def to_json(self):
+        return {
+            "created": self.created,
+            "size": self.squad.size,
+            "invited_by": self.invited_by
+        }
+
+
+class SquadActivity(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    squad = models.ForeignKey("Squad", related_name="activity")
+    user = models.ForeignKey("SquadUser", related_name="activity")
+    text = models.CharField(max_length=255, blank=True)
 
 
 class Pin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey("SquadUser", related_name="pins")
+    user = models.ForeignKey("SquadUser", related_name="pins", null=False)
+    squad = models.ForeignKey("Squad", related_name="pins", null=False)
     lat = models.DecimalField(max_digits=10, decimal_places=8)
     lon = models.DecimalField(max_digits=11, decimal_places=8)
     title = models.CharField(max_length=255, blank=True)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    created_by = models.CharField(max_length=255, blank=False, null=False)
     created = models.DateTimeField(auto_now_add=True)
+    content_type = models.CharField(max_length=255, blank=True, null=True, default="none")
+    content_url = models.CharField(max_length=255, blank=True, null=True)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "lat": self.lat,
+            "lon": self.lon,
+            "title": self.title,
+            "desc": self.description,
+            "created_by": self.created_by,
+            "created": self.created,
+            "content_type": self.content_type,
+            "content_url": self.content_url
+        }
+
+
+class FriendRequest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey("SquadUser", related_name="friend_requests", null=False)
+    requested_by = models.ForeignKey("SquadUser", null=False)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "username": self.user.username,
+            "requested_by": self.requested_by.username,
+            "requested_by_id": self.requested_by.id
+        }
 
 
 class Squad(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    leader = models.OneToOneField("SquadUser", related_name="meta")
+    leader = models.OneToOneField("SquadUser", related_name="meta", null=False)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
     size = models.IntegerField(null=False, default=1)
     created = models.DateTimeField(auto_now_add=True)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "desc": self.description,
+            "created": self.created,
+            "size": self.size,
+            "leader": self.leader.username
+        }
 
 
 class SquadUserManager(BaseUserManager):
@@ -73,7 +131,7 @@ class SquadUser(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
-    avatar = models.CharField(max_length=255, blank=True)
+    avatar = models.CharField(max_length=255, blank=True, null=True)
     squad = models.ForeignKey("Squad", related_name="members", null=True)
     status = models.CharField(max_length=255, blank=True)
     friends = models.ManyToManyField("self")

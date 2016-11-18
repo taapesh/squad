@@ -3,10 +3,17 @@ from django.db import IntegrityError
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from app.models import SquadUser
 from app.services import auth_service
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def get_auth_user(request):
+    return Response(request.user.to_json(), status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

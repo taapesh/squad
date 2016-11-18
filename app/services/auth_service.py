@@ -6,6 +6,7 @@ from app.models import SquadUser
 def register(email, username, password):
     user = SquadUser.objects.create_user(email=email, username=username, password=password)
     user.token = get_auth_token(user)
+    user.save()
     return user
 
 
@@ -22,6 +23,7 @@ def login(email, password):
     user = SquadUser.objects.get(email=email)
     if user.check_password(password):
         user.token = get_auth_token(user)
+        user.save()
         return user
     else:
         return None
