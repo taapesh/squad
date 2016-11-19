@@ -12,11 +12,11 @@ if response.status_code == 200:
 	#for d in data:
 	#	print d.get("block")
 	while True:
-		print data[data_index]["date_time"]
 		try:
-			print data[data_index]["block"] 
+			print data[data_index]["block"]
+			print data[data_index]["location"]
+			print data[data_index]["date_time"]
+			print data[data_index]["nature_of_call"] 
 		except KeyError:
-			print "None"
-		print data[data_index]["location"]
-		print data[data_index]["nature_of_call"]
+			data_index += 1
 		data_index += 1
