@@ -29,15 +29,5 @@ class Migration(migrations.Migration):
             name='invited_by',
             field=models.CharField(blank=True, max_length=255),
         ),
-        migrations.CreateModel(
-            name='PoliceCall',
-            fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('street_number', models.IntegerField(null=True)),
-                ('street_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-            ],
-        ),
     ]
 
