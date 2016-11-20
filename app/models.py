@@ -170,20 +170,3 @@ class SquadUser(AbstractBaseUser):
     def is_staff(self):
         return self.is_admin
 
-class PoliceCall(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created = models.DateTimeField(auto_now_add=True)
-    street_number = models.IntegerField(null=True)
-    street_name = models.CharField(max_length=255, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
-
-    def to_json(self):
-        return {
-            "id": self.id,
-            "created": self.created,
-            "street_number": self.content_type,
-            "street_name": self.content_url,
-            "description": self.description
-        }
-
-
